@@ -1,0 +1,69 @@
+# ============================================================================
+# Trae Enterprise Usage Monitor — 配置文件
+#
+# 所有接口凭证、查询范围与飞书推送目标都集中在这里维护。
+# 运行：  cargo run --release -- --config ./config.yaml
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# Trae 企业版 OpenAPI 配置
+# 文档：https://docs.trae.cn/enterprise/trae-cn-enterprise-api
+# ---------------------------------------------------------------------------
+trae:
+  # OpenAPI 基础域名（标准版）。若开通了企业自定义域名，替换为对应域名。
+  base_url: "https://console.enterprise.trae.cn"
+
+  # 在「Trae 企业版控制台 → 应用」中创建应用后获取，并为应用授予 statistics / users:read 权限。
+  app_id: "YOUR_APP_ID"
+  app_secret: "YOUR_APP_SECRET"
+
+  query:
+    # 统计窗口：end_date 默认今天，start_date 始终按 days 自动回溯，无需手动设置：
+    #   end_date   = 今天（按下面的 timezone 计算，可用 end_date 覆盖）
+    #   start_date = end_date - (days - 1)   含首尾共 days 天
+    days: 30                # 统计天数（1~180）
+    end_date: ""           # 形如 "2026-06-07"，留空则取今天
+    timezone: "Asia/Shanghai"
+
+    # 统计成员：始终通过接口自动获取「全部成员」，下面只配置黑名单做排除。
+    # 命中 user_id 或 email 任一即排除（email 不区分大小写）。两个黑名单都留空 => 统计全部成员。
+    exclude_user_ids: []   # 例如 [12314124, 809080]
+    exclude_emails: []     # 例如 ["bot@example.com", "test@example.com"]
+    max_users: 100         # 自动拉取成员的人数上限（接口单次统计上限 100）
+
+# ---------------------------------------------------------------------------
+# 飞书（Lark）推送配置
+# ---------------------------------------------------------------------------
+feishu:
+  base_url: "https://open.feishu.cn"
+
+  # —— 方式一：自建应用 API（推荐，可推送到「群」或「个人」）——
+  # 在「飞书开放平台 → 开发者后台」创建自建应用，开通
+  # im:message / im:message:send_as_bot 权限后获取 app_id / app_secret。
+  app_id: "YOUR_APP_ID"
+  app_secret: "YOUR_APP_SECRET"
+
+  # 推送目标列表：可同时配置多个，群与个人混合并存，逐个发送。
+  # type: chat_id（群）/ open_id / user_id / union_id / email / mobile（个人）
+  # id:   群用 oc_xxx；个人用 open_id(ou_xxx) / user_id / union_id / 邮箱 / 手机号
+  # 注意：mobile 需额外开通权限 contact:user.id:readonly，程序会先用手机号换取 open_id 再发送。
+  targets:
+    #- type: "open_id"
+    #  id: "ou_xxxxxxxxxxxxxxxx"
+    # - type: "chat_id"
+    #   id: "oc_xxxxxxxxxxxxxxxx"
+    # - type: "email"
+    #   id: "someone@example.com"
+     - type: "chat_id"
+       id: "oc_xxxxxxxxxxxxxxxx"
+     - type: "chat_id"
+       id: "oc_xxxxxxxxxxxxxxxx"
+
+  # —— 方式二：群自定义机器人 Webhook（仅能发到机器人所在的群）——
+  # 若填写了 webhook_url，则忽略上面的 targets，直接走 Webhook 发送。
+  webhook_url: ""
+  # 若群机器人开启了「签名校验」，填入密钥；否则留空。
+  webhook_secret: ""
+
+  # 卡片标题
+  card_title: "Trae AI 使用详情周报"

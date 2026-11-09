@@ -1,0 +1,9 @@
+/target
+**/*.rs.bk
+# 二进制 crate 应提交 Cargo.lock 以保证可复现构建，故不忽略它。
+# 不要把真实凭证提交到仓库
+config.local.yaml
+config.yaml
+.claude/settings.local.json
+*.log
+.DS_Store

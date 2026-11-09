@@ -7,3 +7,4 @@ config.yaml
 .claude/settings.local.json
 *.log
 .DS_Store
+CLAUDE.md
